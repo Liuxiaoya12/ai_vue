@@ -1,0 +1,170 @@
+<template>
+  <div class="auth-container">
+    <div class="auth-content">
+      <div class="auth-left">
+        <h2 class="auth-title">登录账号</h2>
+        <el-form ref="loginForm" :model="loginForm" :rules="rules" class="auth-form">
+          <el-form-item prop="email">
+            <el-input
+                v-model="loginForm.email"
+                placeholder="请输入邮箱"
+                prefix-icon="el-icon-message"
+            />
+          </el-form-item>
+
+          <el-form-item prop="password">
+            <el-input
+                v-model="loginForm.password"
+                type="password"
+                placeholder="请输入密码"
+                prefix-icon="el-icon-lock"
+                show-password
+            />
+          </el-form-item>
+
+          <div class="form-options">
+            <el-checkbox v-model="loginForm.remember">记住密码</el-checkbox>
+            <el-link type="primary">忘记密码?</el-link>
+          </div>
+
+          <el-button type="primary" class="submit-btn" @click="handleLogin">
+            登录
+          </el-button>
+        </el-form>
+      </div>
+
+      <div class="auth-right">
+        <h3>没有账号?</h3>
+        <el-button type="primary" @click="$router.push('/register')">
+          注册
+        </el-button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { login } from '@/services/api'
+
+export default {
+  name: 'Login',
+  data() {
+    return {
+      loginForm: {
+        email: '',
+        password: '',
+        remember: false
+      },
+      rules: {
+        email: [
+          { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+          { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' }
+        ]
+      }
+    }
+  },
+  methods: {
+    async handleLogin() {
+      console.log("点击登录")
+      try {
+        const valid = await this.$refs.loginForm.validate()
+        if (!valid) return
+
+        const { email, password } = this.loginForm
+        const response = await login(email, password)
+
+        if (response.data.token) {
+          this.$store.dispatch('setToken', response.data.token)
+          this.$router.push('/personal-kb')
+          this.$message.success('登录成功')
+        }
+      } catch (error) {
+        this.$message.error(error.response?.data?.message || '登录失败')
+      }
+    }
+  }
+}
+</script>
+
+
+
+<style scoped>
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f7fa;
+}
+
+.auth-content {
+  display: flex;
+  width: 800px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.auth-left {
+  flex: 1;
+  padding: 40px;
+  border-right: 1px solid #eee;
+}
+
+.auth-right {
+  width: 300px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-title {
+  font-size: 24px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.auth-form {
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.submit-btn {
+  width: 100%;
+}
+
+/* Element UI overrides */
+.el-form-item {
+  margin-bottom: 20px;
+}
+
+.el-input__inner {
+  height: 40px;
+}
+
+.el-button {
+  height: 40px;
+  font-size: 16px;
+}
+
+.el-checkbox__label {
+  font-size: 14px;
+}
+
+.el-link {
+  font-size: 14px;
+}
+</style>
+
