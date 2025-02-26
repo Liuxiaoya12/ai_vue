@@ -48,12 +48,15 @@ import { login } from '@/services/api'
 
 export default {
   name: 'Login',
+  created() {
+    console.log("Store 是否存在:", this.$store); // 调试此行
+  },
   data() {
     return {
       loginForm: {
         email: '',
         password: '',
-        remember: false
+        remember: true
       },
       rules: {
         email: [
@@ -68,21 +71,23 @@ export default {
   },
   methods: {
     async handleLogin() {
-      console.log("点击登录")
       try {
-        const valid = await this.$refs.loginForm.validate()
-        if (!valid) return
+        const valid = await this.$refs.loginForm.validate();
+        if (!valid) return;
 
-        const { email, password } = this.loginForm
-        const response = await login(email, password)
+        const { email, password } = this.loginForm;
+        const response = await login(email, password);
+
+        console.log('登录响应:', response); // 确认响应结构
 
         if (response.data.token) {
-          this.$store.dispatch('setToken', response.data.token)
-          this.$router.push('/personal-kb')
-          this.$message.success('登录成功')
+          await this.$store.dispatch('setToken', response.data.token);
+          console.log('跳转前 token 状态:', this.$store.getters.getToken); // 调试
+          this.$router.push('/personal-kb');
         }
       } catch (error) {
-        this.$message.error(error.response?.data?.message || '登录失败')
+        console.error('登录错误详情:', error); // 输出完整错误对象
+        this.$message.error(error.response?.data?.message || '登录失败');
       }
     }
   }

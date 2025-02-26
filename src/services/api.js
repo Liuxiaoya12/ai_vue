@@ -1,44 +1,3 @@
-// import axios from "axios"
-// import store from "@/stores/auth"
-// //
-// // const api = axios.create({
-// //     baseURL: "/api",
-// //     headers: {
-// //         "Content-Type": "application/json",
-// //     },
-// // })
-// //
-// // export const login = async (email, password) => {
-// //     return await api.post("/user/login", { email, password })
-// // }
-// //
-// // export const register = async (name, email, password, repeatpassword) => {
-// //     return await api.post("/user/register", { name, email, password, repeatpassword })
-// // }
-// // 创建一个新的 axios 实例，用于非登录/注册请求
-// const api = axios.create({
-//     baseURL: "http://127.0.0.1:8010",
-//     headers: {
-//         "Content-Type": "application/json",
-//     },
-// })
-// export const login = async (email, password) => {
-//     return await axios.post('http://127.0.0.1:8010/user/login', { email, password })
-// }
-// export const register = async (name, email, password, repeatpassword) => {
-//     return await axios.post("http://127.0.0.1:8010/user/register", { name, email, password, repeatpassword })
-// }
-//
-// // 如果存在令牌,则为请求添加认证头
-// api.interceptors.request.use((config) => {
-//     const token = store.state.token
-//     if (token) {
-//         config.headers.Authorization = `Bearer ${token}`
-//     }
-//     return config
-// })
-//
-// export default api
 import axios from "axios"
 import store from '@/stores/auth'
 // 创建一个新的 axios 实例
@@ -51,15 +10,8 @@ const api = axios.create({
 })
 // 登录和注册函数使用 api 实例
 export const login = async (email, password) => {
-    try {
-        // 使用相对路径 '/user/login'
-        const response = await api.post("/user/login", { email, password })
-        console.log("Login response:", response)
-        return response
-    } catch (error) {
-        console.error("Login error:", error.response || error)
-        throw error
-    }
+    console.log("Attempting registration with:", { email, password }) // 添加日志
+    return await api.post("/user/login", { email, password })
 }
 
 export const register = async (name, email, password, repeatpassword) => {

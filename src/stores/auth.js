@@ -1,52 +1,33 @@
-const store = {
+// src/stores/auth.js
+import Vue from "vue";
+import Vuex from "vuex";
+
+Vue.use(Vuex); // 确保 Vuex 已注册
+
+export default new Vuex.Store({
     state: {
-        token: null,
+        token: localStorage.getItem("token") || null,
     },
     mutations: {
         setToken(state, token) {
-            state.token = token
+            state.token = token;
+            localStorage.setItem("token", token);
         },
         clearToken(state) {
-            state.token = null
+            state.token = null;
+            localStorage.removeItem("token");
         },
     },
     actions: {
-        login(context, token) {
-            context.commit("setToken", token)
+        setToken({ commit }, token) {
+            commit("setToken", token);
         },
-        logout(context) {
-            context.commit("clearToken")
-        },
-    },
-    getters: {
-        isLoggedIn: (state) => !!state.token,
-        getToken: (state) => state.token,
-    },
-}
-
-export default {
-    state: {
-        token: null,
-    },
-    mutations: {
-        setToken(state, token) {
-            state.token = token
-        },
-        clearToken(state) {
-            state.token = null
-        },
-    },
-    actions: {
-        login(context, token) {
-            context.commit("setToken", token)
-        },
-        logout(context) {
-            context.commit("clearToken")
+        logout({ commit }) {
+            commit("clearToken");
         },
     },
     getters: {
-        isLoggedIn: (state) => !!state.token,
+        isAuthenticated: (state) => !!state.token,
         getToken: (state) => state.token,
     },
-}
-
+});

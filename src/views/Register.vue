@@ -111,7 +111,6 @@ export default {
 
         if (response.data) {
           this.$message.success('注册成功')
-          this.$router.push('/personal-kb')
         }
       } catch (error) {
         this.$message.error(error.response?.data?.message || '注册失败')

@@ -56,10 +56,43 @@
             <span>知识库问答</span>
           </el-menu-item>
 
-          <el-menu-item index="/personal-kb">
-            <i class="el-icon-collection"></i>
-            <span>个人知识库管理</span>
-          </el-menu-item>
+
+          <el-submenu index="/personal-kb">
+            <template slot="title">
+              <i class="el-icon-collection"></i>
+              <span>个人知识库管理</span>
+            </template>
+            <!-- 动态渲染知识库列表 -->
+            <el-menu-item
+                v-for="kb in currentKnowledgeBases"
+                :key="kb.id"
+                :index="`/knowledge-base/${kb.id}`"
+                :route="{ path: `/knowledge-base/${kb.id}`, query: { name: kb.name } }"
+            >
+              <span>{{ kb.name }}</span>
+            </el-menu-item>
+            <el-menu-item @click.native.prevent="showCreateDialog">
+              <span>新建知识库</span>
+            </el-menu-item>
+          </el-submenu>
+
+          <!-- 添加创建知识库的对话框 -->
+          <el-dialog
+              title="新建知识库"
+              :visible.sync="dialogVisible"
+              width="30%"
+              :before-close="handleClose"
+          >
+            <el-form :model="form">
+              <el-form-item label="知识库名称">
+                <el-input v-model="form.name" placeholder="请输入知识库名称"></el-input>
+              </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="createKnowledgeBase">确定</el-button>
+      </span>
+          </el-dialog>
 
           <el-menu-item index="/doc-writing">
             <i class="el-icon-edit-outline"></i>
@@ -130,30 +163,96 @@ export default {
     return {
       activeMenu: '/personal-kb',
       searchQuery: '',
-      logoPath: require('@/assets/logo.png')
+      logoPath: require('@/assets/logo.png'),
+      dialogVisible: false,
+      form: {
+        name: ''
+      },
+      knowledgeBases: [] // Initialize as empty array
     }
   },
-  methods: {
-    handleSelect(index) {
-      if (index === 'logout') {
-        this.handleLogout()
-      }
-    },
-    handleImageError() {
-      this.logoPath = '/placeholder.svg?height=60&width=200'
-    },
-    handleLogout() {
-      this.$store.dispatch('clearToken')
-      this.$router.push('/login')
+  watch: {
+    knowledgeBases: {
+      handler(newVal) {
+        // 当知识库列表发生变化时，强制更新视图
+        this.$forceUpdate();
+      },
+      deep: true
     }
   },
   computed: {
     isAuthPage() {
       return this.$route.path === '/login' || this.$route.path === '/register';
+    },
+    currentKnowledgeBases() {
+      return this.knowledgeBases;
+    }
+  },
+  methods: {
+    // 使用普通函数而不是箭头函数，确保 this 指向 Vue 实例
+    handleSelect(index) {
+      if (index === 'logout') {
+        this.handleLogout();
+        return false; // 阻止默认路由行为
+      } else if (index === 'ignore') {
+        this.showCreateDialog(); // 直接调用显示对话框方法
+        return false; // 阻止路由跳转
+      }
+    },
+    handleImageError() {
+      this.logoPath = '/placeholder.svg?height=60&width=200';
+    },
+    handleLogout() {
+      this.$store.dispatch('clearToken');
+      this.$router.push('/login');
+    },
+    showCreateDialog() {
+      this.dialogVisible = true;
+    },
+    handleClose(done) {
+      const vm = this; // 保存 Vue 实例的引用
+      this.$confirm('确认关闭？')
+          .then(function () {
+            done();
+            vm.form.name = ''; // 使用保存的引用
+          })
+          .catch(function () {
+          });
+    },
+    createKnowledgeBase() {
+      if (!this.form.name.trim()) {
+        this.$message.error('请输入知识库名称');
+        return;
+      }
+
+      // 创建新知识库时添加name字段
+      const newKB = {
+        id: Date.now().toString(),
+        name: this.form.name
+      };
+
+      this.knowledgeBases.push(newKB); // 直接push新条目
+      localStorage.setItem('knowledgeBases', JSON.stringify(this.knowledgeBases));
+
+      this.dialogVisible = false;
+      this.form.name = '';
+      this.$message.success('知识库创建成功');
     }
   },
   created() {
-    this.activeMenu = this.$route.path
+    this.activeMenu = this.$route.path;
+  },
+  mounted() {
+    // Load knowledge bases from localStorage or your backend
+    const savedKBs = localStorage.getItem('knowledgeBases');
+    if (savedKBs) {
+      try {
+        this.knowledgeBases = JSON.parse(savedKBs);
+      } catch (e) {
+        console.error('Error parsing knowledge bases:', e);
+        this.knowledgeBases = [];
+      }
+    }
   }
 }
 </script>
@@ -290,4 +389,3 @@ export default {
   margin-left: 0 !important;
 }
 </style>
-
