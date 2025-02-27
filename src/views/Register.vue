@@ -109,11 +109,14 @@ export default {
         const { name, email, password, repeatpassword } = this.registerForm
         const response = await register(name, email, password, repeatpassword)
 
-        if (response.data) {
+        if (response.data.code==='1') {
           this.$message.success('注册成功')
         }
+        else{
+          this.$message.error(response.data.msg || '注册失败')
+        }
       } catch (error) {
-        this.$message.error(error.response?.data?.message || '注册失败')
+        // this.$message.error(error.response?.data?.message || '注册失败')
       }
     }
   }

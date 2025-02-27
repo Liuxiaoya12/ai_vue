@@ -80,14 +80,17 @@ export default {
 
         console.log('登录响应:', response); // 确认响应结构
 
-        if (response.data.token) {
+        if (response.data.token!='') {
           await this.$store.dispatch('setToken', response.data.token);
           console.log('跳转前 token 状态:', this.$store.getters.getToken); // 调试
           this.$router.push('/personal-kb');
+        }else{
+          console.error('登录错误详情:', response.data.msg); // 输出完整错误对象
+          this.$message.error(response.data.msg || '登录失败');
         }
       } catch (error) {
         console.error('登录错误详情:', error); // 输出完整错误对象
-        this.$message.error(error.response?.data?.message || '登录失败');
+
       }
     }
   }
