@@ -108,15 +108,18 @@ export default {
 
         const { name, email, password, repeatpassword } = this.registerForm
         const response = await register(name, email, password, repeatpassword)
-
-        if (response.data.code==='1') {
+        console.log('response.data:',response.data)
+        if (response.data.code===0) {
+          this.$router.push('/login')
           this.$message.success('注册成功')
+          console.log('response.data.code if',response.data.code)
         }
         else{
           this.$message.error(response.data.msg || '注册失败')
+          console.log('response.data.code else',response.data.code)
         }
       } catch (error) {
-        // this.$message.error(error.response?.data?.message || '注册失败')
+        this.$message.error(error.response?.data?.message || '注册失败')
       }
     }
   }

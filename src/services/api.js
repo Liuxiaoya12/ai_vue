@@ -19,6 +19,7 @@ export const register = async (name, email, password, repeatpassword) => {
     return await api.post("/user/register", { name, email, password, repeatpassword })
 }
 
+
 // 如果存在令牌，则为请求添加认证头
 api.interceptors.request.use((config) => {
     const token = store.state.token
